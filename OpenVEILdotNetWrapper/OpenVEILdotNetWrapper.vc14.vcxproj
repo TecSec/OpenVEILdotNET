@@ -102,7 +102,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCored.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenVEILCored.lib;OpenVEILFileSupportd.lib;OpenVEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\libd</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -116,7 +116,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCored.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenVEILCored.lib;OpenVEILFileSupportd.lib;OpenVEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib64d</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -129,7 +129,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenVEILCore.lib;OpenVEILFileSupport.lib;OpenVEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -142,7 +142,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenVEILCore.lib;OpenVEILFileSupport.lib;OpenVEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -160,13 +160,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Connector.cpp" />
+    <ClCompile Include="Favorite.cpp" />
     <ClCompile Include="OpenVEILdotNetWrapper.cpp" />
+    <ClCompile Include="Session.cpp" />
     <ClCompile Include="Stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

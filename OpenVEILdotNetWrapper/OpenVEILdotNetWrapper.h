@@ -33,255 +33,209 @@
 
 #pragma once
 
-#include "OpenVEIL.h"
-
-using namespace System;
-using namespace DynamicJsonParser;
-using namespace System::Reflection;
-using namespace System::Runtime::InteropServices;
-using namespace System::Web::Script::Serialization;
 
 namespace OpenVEIL {
 
-	class ConnectionWrapper
+	public ref class TecSecRuntimeException : public System::Exception
 	{
 	public:
-		ConnectionWrapper() {}
-		~ConnectionWrapper() {}
+		TecSecRuntimeException(String^ msg) : Exception(msg)
+		{}
+		TecSecRuntimeException(const tsAscii& msg) : Exception(tsAsciiToString(msg))
+		{}
+	};
 
-		void set(std::shared_ptr<IKeyVEILConnector> setTo) { _value = setTo; }
-		bool operator!() { return !_value; }
-		IKeyVEILConnector* operator->() { if (!_value) return nullptr; return _value.get(); }
+	public ref class Environment
+	{
+	public:
+		Environment() {}
+		~Environment() {}
+
+		void DispatchEvents() // Call this in the main thread to receive queued up events
+		{
+			// TODO:  Implement me
+		}
+		bool InitializeVEIL(bool initiateChangeMonitoring)
+		{
+			// Forces the core system to initialize
+			if (!::ServiceLocator())
+				return false;
+
+			if (initiateChangeMonitoring)
+			{
+
+			}
+			return true;
+		}
+		bool TerminateVEIL()
+		{
+			TerminateVEILSystem();
+			return true;
+		}
+	private:
+		//std::deque<QueuedVEILEvent> _events;
+	};
+
+	ref class Favorite;
+
+	public enum class LoginStatus
+	{
+		Connected,
+		NoServer,
+		BadAuth,
+	};
+
+	public enum class ConnectionStatus
+	{
+		Connected,
+		NoServer,
+		BadAuth,
+		WrongProtocol,
+		UrlBad,
+	};
+
+	public ref class Session
+	{
+	public:
+		Session();
+		Session(std::shared_ptr<IKeyVEILSession> _sess);
+		~Session();
+
+		void release();
+		void close();
+		LoginStatus login(String^ pin);
+		property bool isLoggedIn { bool get(); }
+		bool logout();
+		//bool GenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, std::function<bool(Asn1::CTS::CkmCombineParameters&, tsData&)> headerCallback, tsData &WorkingKey);
+		//bool RegenerateWorkingKey(Asn1::CTS::CkmCombineParameters& params, tsData &WorkingKey);
+		DynamicJsonParser::DynamicJsonObject^ getProfile();
+		property bool isLocked { bool get(); }
+		property int retriesLeft { int get(); }
+		property bool isValid { bool get(); }
+		Session^ duplicate();
+		bool encryptFileUsingFavorite(Favorite^ fav, String^ sourceFile, bool compress, String^ encryptedFile);
+		bool decryptFile(String^ encryptedFile, String^ decryptedFile);
+		array<byte>^ encryptDataUsingFavorite(Favorite^ fav, array<byte>^ sourceData, bool compress);
+		array<byte>^ decryptData(array<byte>^ encryptedData);
+
+	internal:
+		std::shared_ptr<IKeyVEILSession> handle();
+
 	protected:
-		std::shared_ptr<IKeyVEILConnector> _value;
+		internalWrapper<IKeyVEILSession>* _dataHolder;
+
+		bool isReady();
+	};
+
+	public ref class Favorite
+	{
+	public:
+		Favorite();
+	internal:
+		Favorite(std::shared_ptr<IFavorite> _fav);
+	public:
+		~Favorite();
+
+		void release();
+		property System::Guid favoriteId {System::Guid get(); void set(System::Guid setTo); }
+		property System::Guid enterpriseId {System::Guid get(); void set(System::Guid setTo); }
+		property String^ favoriteName {String^ get(); void set(String^ setTo); }
+		array<byte>^ getTokenSerialNumber();
+		void setTokenSerialNumber(array<byte>^ setTo);
+		array<byte>^ getHeaderData();
+		void setHeaderData(array<byte>^ setTo);
+
+		bool encryptFile(Session^ session, String^ sourceFile, bool compress, String^ encryptedFile);
+		array<byte>^ encryptData(Session^ session, array<byte>^ sourceData, bool compress);
+
+	internal:
+		std::shared_ptr<IFavorite> handle();
+
+	protected:
+		internalWrapper<IFavorite>* _dataHolder;
+
+		bool isReady();
+	};
+
+	public ref class Token
+	{
+	public:
+		Token();
+	internal:
+		Token(std::shared_ptr<IToken> _tok);
+	public:
+		~Token();
+
+		void release();
+		property String^ tokenName { String^ get(); void set(String^ setTo); }
+		array<byte>^ serialNumber();
+		property System::Guid id { System::Guid get(); }
+		property String^ enterpriseName { String ^ get(); }
+		property String^ memberName { String ^ get(); }
+		property String^ tokenType { String ^ get(); }
+		property System::Guid enterpriseId { System::Guid get(); }
+		property System::Guid memberId { System::Guid get(); }
+		Session^ openSession();
+
+	internal:
+		std::shared_ptr<IToken> handle();
+
+	protected:
+		internalWrapper<IToken>* _dataHolder;
+
+		bool isReady();
 	};
 
 	public ref class Connector abstract
 	{
 	public:
-		Connector() :
-			_conn(new ConnectionWrapper())
-		{
-			_conn->set(::ServiceLocator()->try_get_instance<IKeyVEILConnector>("/KeyVEILConnector"));
-		}
-		virtual ~Connector()
-		{
-			if (_conn != nullptr)
-				delete _conn;
-			_conn = nullptr;
-		}
-		virtual int connect(String^ url, String^ username, String^ password) = 0;
-		virtual void disconnect()
-		{
-			if (isConnected())
-			{
-				(*_conn)->disconnect();
-			}
-		}
-		virtual bool isConnected()
-		{
-			if (isReady())
-			{
-				return (*_conn)->isConnected();
-			}
-			else
-			{
-				return false;
-			}
-		}
-		virtual bool sendJsonRequest(String^ verb, String^ cmd, DynamicJsonObject^ inData, [Out]DynamicJsonObject^% outData, [Out]int% status)
-		{
-			return sendJsonRequest(verb, cmd, inData->ToString(), outData, status);
-		}
-		virtual bool sendJsonRequest(String^ verb, String^ cmd, String^ inData, [Out]DynamicJsonObject^% outData, [Out]int% status)
-		{
-			status = 0;
-			outData = nullptr;
-			if (!isReady())
-			{
-				return false;
-			}
-
-			tsAscii Verb, Cmd, InData;
-
-			IntPtr glob = Marshal::StringToHGlobalAnsi(verb);
-			Verb = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(cmd);
-			Cmd = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(inData);
-			InData = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			JSONObject inDataTmp;
-			JSONObject outDataTmp;
-			int stat;
-
-			if (inDataTmp.FromJSON(InData.c_str()) <= 0)
-			{
-				return false;
-			}
-
-			if (!(*_conn)->sendJsonRequest(Verb, Cmd, inDataTmp, outDataTmp, stat))
-			{
-				status = stat;
-				JavaScriptSerializer^ serializer = gcnew JavaScriptSerializer();
-				serializer->RegisterConverters(gcnew array<JavaScriptConverter^> { gcnew DynamicJsonConverter() });
-
-				outData = serializer->Deserialize<DynamicJsonObject^>(gcnew String(outDataTmp.ToJSON().c_str()));
-				return false;
-			}
-
-			status = stat;
-			JavaScriptSerializer^ serializer = gcnew JavaScriptSerializer();
-			serializer->RegisterConverters(gcnew array<JavaScriptConverter^> { gcnew DynamicJsonConverter() });
-
-			outData = serializer->Deserialize<DynamicJsonObject^>(gcnew String(outDataTmp.ToJSON().c_str()));
-			return true;
-		}
-		virtual bool sendRequest(String^ verb, String^ cmd, array<byte>^ inData, [Out]array<byte>^% outData, [Out]int% status)
-		{
-			status = 0;
-			outData = nullptr;
-			if (!isReady())
-			{
-				return false;
-			}
-
-			tsAscii Verb, Cmd;
-
-			IntPtr glob = Marshal::StringToHGlobalAnsi(verb);
-			Verb = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(cmd);
-			Cmd = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			pin_ptr<byte> p;
-			p = &inData[0];
-
-			tsData tmp(p, inData->Length);
-			tsData outDataTmp;
-
-			int stat;
-
-			if (!(*_conn)->sendRequest(Verb, Cmd, tmp, outDataTmp, stat))
-			{
-				status = stat;
-				outData = gcnew array<byte>(outDataTmp.size());
-				p = &outData[0];
-				memcpy(p, outDataTmp.c_str(), outDataTmp.size());
-				return false;
-			}
-
-			status = stat;
-			outData = gcnew array<byte>(outDataTmp.size());
-			p = &outData[0];
-			memcpy(p, outDataTmp.c_str(), outDataTmp.size());
-			return true;
-		}
-		virtual bool sendRequestBase64(String^ verb, String^ cmd, String^ inData, [Out]String^% outData, [Out]int% status)
-		{
-			status = 0;
-			outData = nullptr;
-			if (!isReady())
-			{
-				return false;
-			}
-
-			tsAscii Verb, Cmd, InData;
-
-			IntPtr glob = Marshal::StringToHGlobalAnsi(verb);
-			Verb = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(cmd);
-			Cmd = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(inData);
-			InData = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			tsData outDataTmp;
-
-			int stat;
-
-			if (!(*_conn)->sendRequest(Verb, Cmd, InData.Base64ToData(), outDataTmp, stat))
-			{
-				status = stat;
-				outData = gcnew String(outDataTmp.ToBase64().c_str());
-				return false;
-			}
-
-			status = stat;
-			outData = gcnew String(outDataTmp.ToBase64().c_str());
-			return true;
-		}
+		Connector();
+		virtual ~Connector();
+		virtual ConnectionStatus connect(String^ url, String^ username, String^ password) = 0;
+		virtual void disconnect();
+		virtual bool isConnected();
+		virtual bool sendJsonRequest(String^ verb, String^ cmd, DynamicJsonObject^ inData, [Out]DynamicJsonObject^% outData, [Out]int% status);
+		virtual bool sendJsonRequest(String^ verb, String^ cmd, String^ inData, [Out]DynamicJsonObject^% outData, [Out]int% status);
+		virtual bool sendRequest(String^ verb, String^ cmd, array<byte>^ inData, [Out]array<byte>^% outData, [Out]int% status);
+		virtual bool sendRequestBase64(String^ verb, String^ cmd, String^ inData, [Out]String^% outData, [Out]int% status);
+		std::shared_ptr<IKeyVEILConnector> handle();
 
 	protected:
-		ConnectionWrapper* _conn;
-		bool isReady()
-		{
-			return _conn != nullptr || !!(*_conn);
-		}
+		internalWrapper<IKeyVEILConnector>* _dataHolder;
+
+		bool isReady();
 	};
 	public ref class GenericConnector : public Connector
 	{
 	public:
-		virtual int connect(String^ url, String^ username, String^ password) override
-		{
-			if (!isReady())
-			{
-				return connStatus_NoServer;
-			}
-			tsAscii Url, Username, Password;
-
-			IntPtr glob = Marshal::StringToHGlobalAnsi(url);
-			Url = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(username);
-			Username = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(password);
-			Password = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			return (*_conn)->genericConnectToServer(Url, Username, Password);
-		}
+		virtual ConnectionStatus connect(String^ url, String^ username, String^ password) override;
 	};
 
 	public ref class KeyVEILConnector : public Connector
 	{
 	public:
-		virtual int connect(String^ url, String^ username, String^ password) override
-		{
-			if (!isReady())
-			{
-				return connStatus_NoServer;
-			}
-			tsAscii Url, Username, Password;
-
-			IntPtr glob = Marshal::StringToHGlobalAnsi(url);
-			Url = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(username);
-			Username = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			glob = Marshal::StringToHGlobalAnsi(password);
-			Password = (const char*)glob.ToPointer();
-			Marshal::FreeHGlobal(glob);
-
-			return (*_conn)->connect(Url, Username, Password);
-		}
+		virtual ConnectionStatus connect(String^ url, String^ username, String^ password) override;
+		bool refresh();
+		property int tokenCount { int get(); }
+		Token^ tokenByIndex(int index);
+		Token^ tokenByName(String^ tokenName);
+		Token^ tokenBySerialNumber(array<byte>^ serialNumber);
+		Token^ tokenBySerialNumber(String^ serialNumber);
+		Token^ tokenById(System::Guid id);
+		property int favoriteCount { int get();}
+		Favorite^ favoriteByIndex(int index);
+		Favorite^ favoriteByName(String^ name);
+		Favorite^ favoriteById(System::Guid id);
+		System::Guid CreateFavorite(Token^ token, array<byte>^ headerData, String^ name);
+		System::Guid CreateFavorite(System::Guid tokenId, array<byte>^ headerData, String^ name);
+		System::Guid CreateFavorite(array<byte>^ tokenSerial, array<byte>^ headerData, String^ name);
+		bool DeleteFavorite(System::Guid id);
+		bool UpdateFavoriteName(System::Guid id, String^ name);
+		bool UpdateFavorite(System::Guid id, array<byte>^ data);
+		int tokenCountForEnterpriseId(System::Guid enterpriseId);
+		Token^ tokenForEnterprise(System::Guid enterpriseId, int index);
+		int favoriteCountForEnterprise(System::Guid enterpriseId);
+		Favorite^ favoriteForEnterprise(System::Guid enterpriseId, int index);
 	};
 
 }
