@@ -35,9 +35,9 @@
 
 #pragma once
 
-#include "OpenVEIL.h"
-#include "CmsHeader.h"
-#include "FileVEILSupport.h"
+#include "VEIL.h"
+#include "VEILCmsHeader.h"
+#include "VEILFileSupport.h"
 
 using namespace System;
 using namespace DynamicJsonParser;

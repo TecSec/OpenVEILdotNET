@@ -98,12 +98,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\TecSec\OpenVEIL_7-0\vc14\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\TecSec\VEIL_7-0\vc14\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCored.lib;OpenVEILFileSupportd.lib;OpenVEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\libd</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VEILCored.lib;VEILFileSupportd.lib;VEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\TecSec\VEIL_7-0\vc14\libd</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -112,12 +112,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\TecSec\OpenVEIL_7-0\vc14\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\TecSec\VEIL_7-0\vc14\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCored.lib;OpenVEILFileSupportd.lib;OpenVEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib64d</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VEILCored.lib;VEILFileSupportd.lib;VEILCmsHeaderd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\TecSec\VEIL_7-0\vc14\lib64d</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,12 +125,12 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\TecSec\OpenVEIL_7-0\vc14\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\TecSec\VEIL_7-0\vc14\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCore.lib;OpenVEILFileSupport.lib;OpenVEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VEILCore.lib;VEILFileSupport.lib;VEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\TecSec\VEIL_7-0\vc14\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,12 +138,12 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\TecSec\OpenVEIL_7-0\vc14\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\TecSec\VEIL_7-0\vc14\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenVEILCore.lib;OpenVEILFileSupport.lib;OpenVEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\TecSec\OpenVEIL_7-0\vc14\lib64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>VEILCore.lib;VEILFileSupport.lib;VEILCmsHeader.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\TecSec\VEIL_7-0\vc14\lib64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

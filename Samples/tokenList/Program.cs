@@ -56,7 +56,7 @@ namespace tokenList
                     Console.WriteLine("Token");
                     Console.WriteLine("  Name;            " + token.tokenName);
                     Console.WriteLine("  Type:            " + token.tokenType);
-                    Console.WriteLine("  serialNumber:    " + BitConverter.ToString(token.serialNumber()).Replace("-",""));
+                    Console.WriteLine("  serialNumber:    " + BitConverter.ToString(token.serialNumber()).Replace("-", ""));
                     Console.WriteLine("  id:              " + token.id.ToString("B"));
                     Console.WriteLine("  Enterprise name: " + token.enterpriseName);
                     Console.WriteLine("  Enterprise ID:   " + token.enterpriseId.ToString("B"));
@@ -71,32 +71,46 @@ namespace tokenList
                     Console.WriteLine("  Name:         " + fav.favoriteName);
                     Console.WriteLine("  ID:           " + fav.favoriteId.ToString("B"));
                     Console.WriteLine("  Enterprise:   " + fav.enterpriseId.ToString("B"));
-                    Console.WriteLine("  Token Serial: " + BitConverter.ToString(fav.getTokenSerialNumber()).Replace("-",""));
+                    Console.WriteLine("  Token Serial: " + BitConverter.ToString(fav.getTokenSerialNumber()).Replace("-", ""));
                 }
 
                 Session session = kvConn.tokenBySerialNumber("906845AEC554109D").openSession();
 
-                Console.WriteLine("SESSION");
-                Console.WriteLine("Is Valid:      " + (session.isValid ? "True" : "False"));
-                Console.WriteLine("Is logged in:  " + (session.isLoggedIn ? "True" : "False"));
-
-                if (!session.isLoggedIn)
+                if (session == null)
                 {
-                    Console.WriteLine("  login returned:  " + session.login("11111111").ToString());
-                    Console.WriteLine("  Is logged in:  " + (session.isLoggedIn ? "True" : "False"));
+                    Console.WriteLine("The specified token was not found!  Please load the Ernest Everyone token into KeyVEIL and reset the password.");
                 }
-                byte[] inData = { 1, 2, 3, 4 };
-                Console.WriteLine("Original data: " + BitConverter.ToString(inData));
+                else
+                {
+                    Console.WriteLine("SESSION");
+                    Console.WriteLine("Is Valid:      " + (session.isValid ? "True" : "False"));
+                    Console.WriteLine("Is logged in:  " + (session.isLoggedIn ? "True" : "False"));
 
-                byte[] outData = kvConn.favoriteByName("Staff").encryptData(session, inData, true);
+                    if (!session.isLoggedIn)
+                    {
+                        Console.WriteLine("  login returned:  " + session.login("11111111").ToString());
+                        Console.WriteLine("  Is logged in:  " + (session.isLoggedIn ? "True" : "False"));
+                    }
+                    byte[] inData = { 1, 2, 3, 4 };
+                    Console.WriteLine("Original data: " + BitConverter.ToString(inData));
 
-                Console.WriteLine("Encrypted data: " + BitConverter.ToString(outData));
+                    byte[] outData = kvConn.favoriteByName("Staff").encryptData(session, inData, true);
 
-                byte[] newSrc = session.decryptData(outData);
+                    if (outData == null)
+                    {
+                        Console.WriteLine("Please load the favorite called Staff into KeyVEIL.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Encrypted data: " + BitConverter.ToString(outData));
 
-                Console.WriteLine("Decrypted data: " + BitConverter.ToString(newSrc));
-                Console.WriteLine("File encrypt returned " + (kvConn.favoriteByName("Staff").encryptFile(session, "tokenList.exe", true, "tokenList.exe.ckm") ? "True" : "False"));
-                Console.WriteLine("File decrypt returned " + (session.decryptFile("tokenList.exe.ckm", "tokenList2.exe") ? "True" : "False"));
+                        byte[] newSrc = session.decryptData(outData);
+
+                        Console.WriteLine("Decrypted data: " + BitConverter.ToString(newSrc));
+                        Console.WriteLine("File encrypt returned " + (kvConn.favoriteByName("Staff").encryptFile(session, "tokenList.exe", true, "tokenList.exe.ckm") ? "True" : "False"));
+                        Console.WriteLine("File decrypt returned " + (session.decryptFile("tokenList.exe.ckm", "tokenList2.exe") ? "True" : "False"));
+                    }
+                }
             }
             finally
             {
